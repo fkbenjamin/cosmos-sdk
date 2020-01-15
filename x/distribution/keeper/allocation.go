@@ -132,5 +132,6 @@ func (k Keeper) AllocateTokensToValidator(ctx sdk.Context, val exported.Validato
 	)
 	outstanding := k.GetValidatorOutstandingRewards(ctx, val.GetOperator())
 	outstanding = outstanding.Add(tokens...)
+	fmt.Println("XXXXXX", commission, shared, outstanding)
 	k.SetValidatorOutstandingRewards(ctx, val.GetOperator(), outstanding)
 }
