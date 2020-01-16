@@ -171,6 +171,7 @@ func (k Keeper) AllocateTokensToValidator(ctx sdk.Context, val exported.Validato
 		k.DBarray = append(k.DBarray, blockInfo)
 		if len(k.DBarray)  > 100 {
 			for _,i := range k.DBarray {
+				fmt.Println("inserting", i.Height)
 				// Store data in postgres
 				_, err = k.DB.Model(i).Insert()
 
