@@ -133,7 +133,8 @@ func (k Keeper) AllocateTokensToValidator(ctx sdk.Context, val exported.Validato
 	outstanding := k.GetValidatorOutstandingRewards(ctx, val.GetOperator())
 	outstanding = outstanding.Add(tokens)
 	if val.GetMoniker() == "Staking Facilities" {
-		fmt.Println("XXXXXX", commission, shared, outstanding, val.GetOperator(), val.GetConsAddr(), val.GetMoniker())
+		fmt.Println(ctx.BlockHeight(), ctx.BlockTime(), commission, shared, outstanding)
+
 	}
 	k.SetValidatorOutstandingRewards(ctx, val.GetOperator(), outstanding)
 }
