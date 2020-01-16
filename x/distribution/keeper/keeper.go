@@ -58,7 +58,7 @@ func NewKeeper(cdc *codec.Codec, key sdk.StoreKey, paramSpace params.Subspace,
 		fmt.Println("XXX", prob)
 		panic(prob)
 	}
-	var temp []CosmosRewards
+	var temp []*CosmosRewards
 
 	return Keeper{
 		storeKey:         key,
