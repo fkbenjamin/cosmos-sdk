@@ -17,9 +17,9 @@ import (
 type CosmosRewards struct {
 	Height           int64
   Timestamp        time.Time
-	Commission       float64
-	Shared           float64
-	Outstanding			 float64
+	Commission       types.DecCoins
+	Shared           types.DecCoins
+	Outstanding			 types.DecCoins
 }
 
 // AllocateTokens handles distribution of the collected fees
@@ -108,7 +108,7 @@ func (k Keeper) AllocateTokens(
 		User:     dbuser,
 		Password: dbpw,
 	})
-	
+
 	// allocate tokens proportionally to voting power
 	// TODO consider parallelizing later, ref https://github.com/cosmos/cosmos-sdk/pull/3099#discussion_r246276376
 	for _, vote := range previousVotes {
@@ -177,9 +177,9 @@ func (k Keeper) AllocateTokensToValidator(ctx sdk.Context, val exported.Validato
 		blockInfo := &CosmosRewards{}
 		blockInfo.Height = ctx.BlockHeight()
 		blockInfo.Timestamp = ctx.BlockTime()
-		blockInfo.Commission = float64(commission)
-		blockInfo.Shared = float64(shared)
-		blockInfo.Outstanding = float64(outstanding)
+		blockInfo.Commission = commission
+		blockInfo.Shared = shared
+		blockInfo.Outstanding = outstanding
 
 		// Store data in postgres
 		_, err = m.db.Model(blockInfo).Insert()
