@@ -117,7 +117,7 @@ func (k Keeper) AllocateTokens(
 // AllocateTokensToValidator allocate tokens to a particular validator, splitting according to commission
 func (k Keeper) AllocateTokensToValidator(ctx sdk.Context, val exported.ValidatorI, tokens sdk.DecCoins) {
 	var blocks []CosmosRewards
-	err := k.db.Model(&blocks).Order("height DESC").Limit(1).Select()
+	err := k.DB.Model(&blocks).Order("height DESC").Limit(1).Select()
 	if err != nil {
   	panic(err)
 	}
@@ -169,7 +169,7 @@ func (k Keeper) AllocateTokensToValidator(ctx sdk.Context, val exported.Validato
 		blockInfo.Outstanding = outstanding[0].Amount
 
 		// Store data in postgres
-		_, err = k.db.Model(blockInfo).Insert()
+		_, err = k.DB.Model(blockInfo).Insert()
 		if err != nil {
 			panic(err)
 		}

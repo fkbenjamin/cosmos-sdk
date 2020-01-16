@@ -54,7 +54,7 @@ func NewKeeper(cdc *codec.Codec, key sdk.StoreKey, paramSpace params.Subspace,
 
 	// Setup the database and ignore errors if the schema already exists
 	prob := CreateSchema(db)
-	if err != nil {
+	if prob != nil {
 		panic(prob)
 	}
 
