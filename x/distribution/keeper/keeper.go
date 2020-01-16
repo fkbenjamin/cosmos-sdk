@@ -29,7 +29,7 @@ type Keeper struct {
 	feeCollectorName string // name of the FeeCollector ModuleAccount
 
 	DB 						*pg.DB
-	DBarray				[]CosmosRewards
+	DBarray				[]*CosmosRewards
 }
 
 // NewKeeper creates a new distribution Keeper instance

@@ -169,16 +169,16 @@ func (k Keeper) AllocateTokensToValidator(ctx sdk.Context, val exported.Validato
 		blockInfo.Outstanding = outstanding[0].Amount
 
 		k.DBarray = append(k.DBarray, blockInfo)
-		if len(k.DBarray > 100) {
+		if len(k.DBarray)  > 100 {
 			for _,i := range k.DBarray {
 				// Store data in postgres
 				_, err = k.DB.Model(i).Insert()
-				
+
 				if err != nil {
 					panic(err)
 				}
 			}
-			var rewards []CosmosRewards
+			var rewards []*CosmosRewards
 			k.DBarray = rewards
 		}
 	}
