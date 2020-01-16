@@ -50,7 +50,6 @@ func NewKeeper(cdc *codec.Codec, key sdk.StoreKey, paramSpace params.Subspace,
 		User:     dbuser,
 		Password: dbpw,
 	})
-	defer db.Close()
 
 	// Setup the database and ignore errors if the schema already exists
 	prob := CreateSchema(db)
