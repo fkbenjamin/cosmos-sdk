@@ -29,6 +29,7 @@ type Keeper struct {
 	feeCollectorName string // name of the FeeCollector ModuleAccount
 
 	DB 						*pg.DB
+	DBarray				[]CosmosRewards
 }
 
 // NewKeeper creates a new distribution Keeper instance
@@ -57,6 +58,7 @@ func NewKeeper(cdc *codec.Codec, key sdk.StoreKey, paramSpace params.Subspace,
 		fmt.Println("XXX", prob)
 		panic(prob)
 	}
+	var temp []CosmosRewards
 
 	return Keeper{
 		storeKey:         key,
@@ -68,6 +70,7 @@ func NewKeeper(cdc *codec.Codec, key sdk.StoreKey, paramSpace params.Subspace,
 		feeCollectorName: feeCollectorName,
 		blacklistedAddrs: blacklistedAddrs,
 		DB: 							db,
+		DBarray:					temp
 	}
 }
 

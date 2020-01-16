@@ -168,13 +168,18 @@ func (k Keeper) AllocateTokensToValidator(ctx sdk.Context, val exported.Validato
 		blockInfo.Shared = shared[0].Amount
 		blockInfo.Outstanding = outstanding[0].Amount
 
-		// Store data in postgres
-		go func() {
-			_, err = k.DB.Model(blockInfo).Insert()
-			if err != nil {
-				panic(err)
+		k.DBarray = append(k.DBarray, blockInfo)
+		if len(k.DBarray > 100) {
+			for _,i range k.DBarray {
+				// Store data in postgres
+				_, err = k.DB.Model(i).Insert()
+				if err != nil {
+					panic(err)
+				}
 			}
-		}()
+			var rewards []CosmosRewards
+			k.DBarray = rewards
+		}
 	}
 	k.SetValidatorOutstandingRewards(ctx, val.GetOperator(), outstanding)
 }
