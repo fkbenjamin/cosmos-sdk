@@ -15,14 +15,6 @@ import (
   "github.com/go-pg/pg/orm"
 )
 
-type CosmosRewards struct {
-	Height           int64
-  Timestamp        time.Time
-	Commission       sdk.Dec
-	Shared           sdk.Dec
-	Outstanding			 sdk.Dec
-}
-
 // Keeper of the distribution store
 type Keeper struct {
 	storeKey      sdk.StoreKey
