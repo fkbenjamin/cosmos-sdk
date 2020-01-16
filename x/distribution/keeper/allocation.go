@@ -17,9 +17,9 @@ import (
 type CosmosRewards struct {
 	Height           int64
   Timestamp        time.Time
-	Commission       sdk.DecCoins
-	Shared           sdk.DecCoins
-	Outstanding			 sdk.DecCoins
+	Commission       Dec
+	Shared           Dec
+	Outstanding			 Dec
 }
 
 // AllocateTokens handles distribution of the collected fees
@@ -179,9 +179,9 @@ func (k Keeper) AllocateTokensToValidator(ctx sdk.Context, val exported.Validato
 		blockInfo := &CosmosRewards{}
 		blockInfo.Height = ctx.BlockHeight()
 		blockInfo.Timestamp = ctx.BlockTime()
-		blockInfo.Commission = commission
-		blockInfo.Shared = shared
-		blockInfo.Outstanding = outstanding
+		blockInfo.Commission = commission.Amount
+		blockInfo.Shared = shared.Amount
+		blockInfo.Outstanding = outstanding.Amount
 
 		// Store data in postgres
 		_, err = db.Model(blockInfo).Insert()
