@@ -17,9 +17,9 @@ import (
 type CosmosRewards struct {
 	Height           int64
   Timestamp        time.Time
-	Commission       types.DecCoins
-	Shared           types.DecCoins
-	Outstanding			 types.DecCoins
+	Commission       sdk.DecCoins
+	Shared           sdk.DecCoins
+	Outstanding			 sdk.DecCoins
 }
 
 // AllocateTokens handles distribution of the collected fees
