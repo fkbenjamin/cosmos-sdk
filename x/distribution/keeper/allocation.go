@@ -65,6 +65,23 @@ func (k Keeper) AllocateTokens(
 	remaining := feesCollected
 	proposerValidator := k.stakingKeeper.ValidatorByConsAddr(ctx, previousProposer)
 
+	dburl := ""
+	dbuser := ""
+	dbpw := ""
+
+	db := pg.Connect(&pg.Options{
+		Addr:     dburl,
+		User:     dbuser,
+		Password: dbpw,
+	})
+	defer db.Close()
+
+	// Setup the database and ignore errors if the schema already exists
+	err := CreateSchema(db)
+	if err != nil {
+		panic(err)
+	}
+
 	if proposerValidator != nil {
 		ctx.EventManager().EmitEvent(
 			sdk.NewEvent(
@@ -73,23 +90,7 @@ func (k Keeper) AllocateTokens(
 				sdk.NewAttribute(types.AttributeKeyValidator, proposerValidator.GetOperator().String()),
 			),
 		)
-		dburl := ""
-		dbuser := ""
-		dbpw := ""
 
-		db := pg.Connect(&pg.Options{
-			Addr:     dburl,
-			User:     dbuser,
-			Password: dbpw,
-		})
-		defer db.Close()
-
-		// Setup the database and ignore errors if the schema already exists
-		err := CreateSchema(db)
-		if err != nil {
-			panic(err)
-		}
-		
 		k.AllocateTokensToValidator(ctx, proposerValidator, proposerReward, db)
 		remaining = remaining.Sub(proposerReward)
 	} else {
