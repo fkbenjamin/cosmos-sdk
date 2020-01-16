@@ -9,7 +9,19 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/params"
 
 	"github.com/tendermint/tendermint/libs/log"
+
+	"time"
+	"github.com/go-pg/pg"
+  "github.com/go-pg/pg/orm"
 )
+
+type CosmosRewards struct {
+	Height           int64
+  Timestamp        time.Time
+	Commission       sdk.Dec
+	Shared           sdk.Dec
+	Outstanding			 sdk.Dec
+}
 
 // Keeper of the distribution store
 type Keeper struct {
@@ -24,6 +36,8 @@ type Keeper struct {
 	blacklistedAddrs map[string]bool
 
 	feeCollectorName string // name of the FeeCollector ModuleAccount
+
+	DB 						*pg.DB
 }
 
 // NewKeeper creates a new distribution Keeper instance
@@ -36,6 +50,23 @@ func NewKeeper(cdc *codec.Codec, key sdk.StoreKey, paramSpace params.Subspace,
 		panic(fmt.Sprintf("%s module account has not been set", types.ModuleName))
 	}
 
+	dburl := ""
+	dbuser := ""
+	dbpw := ""
+
+	db := pg.Connect(&pg.Options{
+		Addr:     dburl,
+		User:     dbuser,
+		Password: dbpw,
+	})
+	defer db.Close()
+
+	// Setup the database and ignore errors if the schema already exists
+	prob := CreateSchema(db)
+	if err != nil {
+		panic(prob)
+	}
+
 	return Keeper{
 		storeKey:         key,
 		cdc:              cdc,
@@ -45,6 +76,7 @@ func NewKeeper(cdc *codec.Codec, key sdk.StoreKey, paramSpace params.Subspace,
 		codespace:        codespace,
 		feeCollectorName: feeCollectorName,
 		blacklistedAddrs: blacklistedAddrs,
+		DB: 							db
 	}
 }
 
@@ -148,4 +180,15 @@ func (k Keeper) GetTotalRewards(ctx sdk.Context) (totalRewards sdk.DecCoins) {
 		},
 	)
 	return totalRewards
+}
+
+// CreateSchema sets up the database using the ORM
+func CreateSchema(db *pg.DB) error {
+	for _, model := range []interface{}{(*CosmosRewards)(nil)} {
+		err := db.CreateTable(model, &orm.CreateTableOptions{IfNotExists: true})
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }

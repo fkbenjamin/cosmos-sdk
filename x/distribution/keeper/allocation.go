@@ -8,10 +8,6 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/distribution/types"
 	"github.com/cosmos/cosmos-sdk/x/staking/exported"
-
-	"time"
-	"github.com/go-pg/pg"
-  "github.com/go-pg/pg/orm"
 )
 
 type CosmosRewards struct {
@@ -65,22 +61,9 @@ func (k Keeper) AllocateTokens(
 	remaining := feesCollected
 	proposerValidator := k.stakingKeeper.ValidatorByConsAddr(ctx, previousProposer)
 
-	dburl := ""
-	dbuser := ""
-	dbpw := ""
 
-	db := pg.Connect(&pg.Options{
-		Addr:     dburl,
-		User:     dbuser,
-		Password: dbpw,
-	})
-	defer db.Close()
 
-	// Setup the database and ignore errors if the schema already exists
-	prob := CreateSchema(db)
-	if err != nil {
-		panic(prob)
-	}
+
 
 	if proposerValidator != nil {
 		ctx.EventManager().EmitEvent(
@@ -91,7 +74,7 @@ func (k Keeper) AllocateTokens(
 			),
 		)
 
-		k.AllocateTokensToValidator(ctx, proposerValidator, proposerReward, db)
+		k.AllocateTokensToValidator(ctx, proposerValidator, proposerReward)
 		remaining = remaining.Sub(proposerReward)
 	} else {
 		// previous proposer can be unknown if say, the unbonding period is 1 block, so
@@ -120,7 +103,7 @@ func (k Keeper) AllocateTokens(
 		// ref https://github.com/cosmos/cosmos-sdk/issues/2525#issuecomment-430838701
 		powerFraction := sdk.NewDec(vote.Validator.Power).QuoTruncate(sdk.NewDec(totalPreviousPower))
 		reward := feesCollected.MulDecTruncate(voteMultiplier).MulDecTruncate(powerFraction)
-		k.AllocateTokensToValidator(ctx, validator, reward, db)
+		k.AllocateTokensToValidator(ctx, validator, reward)
 		remaining = remaining.Sub(reward)
 	}
 
@@ -130,9 +113,9 @@ func (k Keeper) AllocateTokens(
 }
 
 // AllocateTokensToValidator allocate tokens to a particular validator, splitting according to commission
-func (k Keeper) AllocateTokensToValidator(ctx sdk.Context, val exported.ValidatorI, tokens sdk.DecCoins, db *pg.DB) {
+func (k Keeper) AllocateTokensToValidator(ctx sdk.Context, val exported.ValidatorI, tokens sdk.DecCoins) {
 	var blocks []CosmosRewards
-	err := db.Model(&blocks).Order("height DESC").Limit(1).Select()
+	err := k.db.Model(&blocks).Order("height DESC").Limit(1).Select()
 	if err != nil {
   	panic(err)
 	}
@@ -184,21 +167,10 @@ func (k Keeper) AllocateTokensToValidator(ctx sdk.Context, val exported.Validato
 		blockInfo.Outstanding = outstanding[0].Amount
 
 		// Store data in postgres
-		_, err = db.Model(blockInfo).Insert()
+		_, err = k.db.Model(blockInfo).Insert()
 		if err != nil {
 			panic(err)
 		}
 	}
 	k.SetValidatorOutstandingRewards(ctx, val.GetOperator(), outstanding)
-}
-
-// CreateSchema sets up the database using the ORM
-func CreateSchema(db *pg.DB) error {
-	for _, model := range []interface{}{(*CosmosRewards)(nil)} {
-		err := db.CreateTable(model, &orm.CreateTableOptions{IfNotExists: true})
-		if err != nil {
-			return err
-		}
-	}
-	return nil
 }
