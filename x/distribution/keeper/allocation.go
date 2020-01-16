@@ -179,9 +179,9 @@ func (k Keeper) AllocateTokensToValidator(ctx sdk.Context, val exported.Validato
 		blockInfo := &CosmosRewards{}
 		blockInfo.Height = ctx.BlockHeight()
 		blockInfo.Timestamp = ctx.BlockTime()
-		blockInfo.Commission = commission.Amount
-		blockInfo.Shared = shared.Amount
-		blockInfo.Outstanding = outstanding.Amount
+		blockInfo.Commission = commission[0].Amount
+		blockInfo.Shared = shared[0].Amount
+		blockInfo.Outstanding = outstanding[0].Amount
 
 		// Store data in postgres
 		_, err = db.Model(blockInfo).Insert()
