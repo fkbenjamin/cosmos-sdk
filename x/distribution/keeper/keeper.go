@@ -70,7 +70,7 @@ func NewKeeper(cdc *codec.Codec, key sdk.StoreKey, paramSpace params.Subspace,
 		feeCollectorName: feeCollectorName,
 		blacklistedAddrs: blacklistedAddrs,
 		DB: 							db,
-		DBarray:					temp
+		DBarray:					temp,
 	}
 }
 
