@@ -117,7 +117,7 @@ func (k Keeper) AllocateTokens(
 		// ref https://github.com/cosmos/cosmos-sdk/issues/2525#issuecomment-430838701
 		powerFraction := sdk.NewDec(vote.Validator.Power).QuoTruncate(sdk.NewDec(totalPreviousPower))
 		reward := feesCollected.MulDecTruncate(voteMultiplier).MulDecTruncate(powerFraction)
-		k.AllocateTokensToValidator(ctx, validator, reward)
+		k.AllocateTokensToValidator(ctx, validator, reward, db)
 		remaining = remaining.Sub(reward)
 	}
 
