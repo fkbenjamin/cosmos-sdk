@@ -10,7 +10,6 @@ import (
 
 	"github.com/tendermint/tendermint/libs/log"
 
-	"time"
 	"github.com/go-pg/pg"
   "github.com/go-pg/pg/orm"
 )
