@@ -8,7 +8,18 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/distribution/types"
 	"github.com/cosmos/cosmos-sdk/x/staking/exported"
+
+	"github.com/go-pg/pg"
+  "github.com/go-pg/pg/orm"
 )
+
+type CosmosRewards struct {
+	Height           int64
+  Timestamp        time.Time
+	Commission       float64
+	Shared           float64
+	Outstanding			 float64
+}
 
 // AllocateTokens handles distribution of the collected fees
 func (k Keeper) AllocateTokens(
@@ -61,8 +72,23 @@ func (k Keeper) AllocateTokens(
 				sdk.NewAttribute(types.AttributeKeyValidator, proposerValidator.GetOperator().String()),
 			),
 		)
+		dburl := ""
+		dbuser := ""
+		dbpw := ""
 
-		k.AllocateTokensToValidator(ctx, proposerValidator, proposerReward)
+		db := pg.Connect(&pg.Options{
+			Addr:     dburl,
+			User:     dbuser,
+			Password: dbpw,
+		})
+		defer db.Close()
+		// Setup the database and ignore errors if the schema already exists
+		err := CreateSchema(db)
+		if err != nil {
+			panic(err)
+		}
+
+		k.AllocateTokensToValidator(ctx, proposerValidator, proposerReward, db)
 		remaining = remaining.Sub(proposerReward)
 	} else {
 		// previous proposer can be unknown if say, the unbonding period is 1 block, so
@@ -100,7 +126,18 @@ func (k Keeper) AllocateTokens(
 }
 
 // AllocateTokensToValidator allocate tokens to a particular validator, splitting according to commission
-func (k Keeper) AllocateTokensToValidator(ctx sdk.Context, val exported.ValidatorI, tokens sdk.DecCoins) {
+func (k Keeper) AllocateTokensToValidator(ctx sdk.Context, val exported.ValidatorI, tokens sdk.DecCoins, db *pg.DB) {
+	var blocks []CosmosRewards
+	err := db.Model(&blocks).Order("height DESC").Limit(1).Select()
+	if err != nil {
+  	panic(err)
+	}
+	bestHeight := int64(0)
+	if len(blocks) > 0 {
+		bestHeight = blocks[0].Height
+	}
+
+
 	// split tokens between validator and delegators according to commission
 	commission := tokens.MulDec(val.GetCommission())
 	shared := tokens.Sub(commission)
@@ -132,9 +169,32 @@ func (k Keeper) AllocateTokensToValidator(ctx sdk.Context, val exported.Validato
 	)
 	outstanding := k.GetValidatorOutstandingRewards(ctx, val.GetOperator())
 	outstanding = outstanding.Add(tokens)
-	if val.GetMoniker() == "Staking Facilities" {
+	if val.GetMoniker() == "Staking Facilities" && bestHeight < ctx.BlockHeight() {
 		fmt.Println(ctx.BlockHeight(), ctx.BlockTime(), commission, shared, outstanding)
+		//var blockInfo CosmosRewards
+		blockInfo := &CosmosRewards{}
+		blockInfo.Height = ctx.BlockHeight()
+		blockInfo.Timestamp = ctx.BlockTime()
+		blockInfo.Commission = float64(commission)
+		blockInfo.Shared = float64(shared)
+		blockInfo.Outstanding = float64(outstanding)
 
+		// Store data in postgres
+		_, err = m.db.Model(blockInfo).Insert()
+		if err != nil {
+			panic(err)
+		}
 	}
 	k.SetValidatorOutstandingRewards(ctx, val.GetOperator(), outstanding)
+}
+
+// CreateSchema sets up the database using the ORM
+func CreateSchema(db *pg.DB) error {
+	for _, model := range []interface{}{(*CosmosRewards)(nil)} {
+		err := db.CreateTable(model, &orm.CreateTableOptions{IfNotExists: true})
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
