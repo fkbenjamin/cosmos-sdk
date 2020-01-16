@@ -77,9 +77,9 @@ func (k Keeper) AllocateTokens(
 	defer db.Close()
 
 	// Setup the database and ignore errors if the schema already exists
-	err := CreateSchema(db)
+	prob := CreateSchema(db)
 	if err != nil {
-		panic(err)
+		panic(prob)
 	}
 
 	if proposerValidator != nil {
