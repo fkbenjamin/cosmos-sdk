@@ -9,6 +9,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/distribution/types"
 	"github.com/cosmos/cosmos-sdk/x/staking/exported"
 
+	"time"
 	"github.com/go-pg/pg"
   "github.com/go-pg/pg/orm"
 )
