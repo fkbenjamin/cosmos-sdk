@@ -73,15 +73,7 @@ func (k Keeper) AllocateTokens(
 				sdk.NewAttribute(types.AttributeKeyValidator, proposerValidator.GetOperator().String()),
 			),
 		)
-		dburl := ""
-		dbuser := ""
-		dbpw := ""
 
-		db := pg.Connect(&pg.Options{
-			Addr:     dburl,
-			User:     dbuser,
-			Password: dbpw,
-		})
 		defer db.Close()
 		// Setup the database and ignore errors if the schema already exists
 		err := CreateSchema(db)
@@ -107,7 +99,16 @@ func (k Keeper) AllocateTokens(
 	// calculate fraction allocated to validators
 	communityTax := k.GetCommunityTax(ctx)
 	voteMultiplier := sdk.OneDec().Sub(proposerMultiplier).Sub(communityTax)
+	dburl := ""
+	dbuser := ""
+	dbpw := ""
 
+	db := pg.Connect(&pg.Options{
+		Addr:     dburl,
+		User:     dbuser,
+		Password: dbpw,
+	})
+	
 	// allocate tokens proportionally to voting power
 	// TODO consider parallelizing later, ref https://github.com/cosmos/cosmos-sdk/pull/3099#discussion_r246276376
 	for _, vote := range previousVotes {
