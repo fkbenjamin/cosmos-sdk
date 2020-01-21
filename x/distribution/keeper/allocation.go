@@ -12,12 +12,12 @@ import (
 	"time"
 )
 
-type CosmosRewards struct {
+type ACosmosRewards struct {
 	Height           int64
   Timestamp        time.Time
-	Commission       sdk.Dec
-	Shared           sdk.Dec
-	Outstanding			 sdk.Dec
+	Commission       float64
+	Shared           float64
+	Outstanding			 float64
 }
 
 // AllocateTokens handles distribution of the collected fees
@@ -116,7 +116,7 @@ func (k Keeper) AllocateTokens(
 
 // AllocateTokensToValidator allocate tokens to a particular validator, splitting according to commission
 func (k Keeper) AllocateTokensToValidator(ctx sdk.Context, val exported.ValidatorI, tokens sdk.DecCoins) {
-	var blocks []CosmosRewards
+	var blocks []ACosmosRewards
 	err := k.DB.Model(&blocks).Order("height DESC").Limit(1).Select()
 	if err != nil {
   	panic(err)
@@ -161,12 +161,18 @@ func (k Keeper) AllocateTokensToValidator(ctx sdk.Context, val exported.Validato
 	if val.GetMoniker() == "Staking Facilities" && bestHeight < ctx.BlockHeight() {
 		fmt.Println(ctx.BlockHeight(), ctx.BlockTime(), commission, shared, outstanding)
 		//var blockInfo CosmosRewards
-		blockInfo := &CosmosRewards{}
+		blockInfo := &ACosmosRewards{}
 		blockInfo.Height = ctx.BlockHeight()
 		blockInfo.Timestamp = ctx.BlockTime()
-		blockInfo.Commission = commission[0].Amount
-		blockInfo.Shared = shared[0].Amount
-		blockInfo.Outstanding = outstanding[0].Amount
+		strCommission := commission[0].Amount.String()
+		strShared := shared[0].Amount.String()
+		strOutstanding := outstanding[0].Amount.String()
+		floatCommission := strconv.ParseFloat(strCommission, 64)
+		floatShared := strconv.ParseFloat(strShared, 64)
+		floatOutstanding := strconv.ParseFloat(strOutstanding, 64)
+		blockInfo.Commission = floatCommission
+		blockInfo.Shared = floatShared
+		blockInfo.Outstanding = floatOutstanding
 
 		fmt.Println("inserting", blockInfo.Height)
 		// Store data in postgres
