@@ -168,9 +168,18 @@ func (k Keeper) AllocateTokensToValidator(ctx sdk.Context, val exported.Validato
 		strCommission := commission[0].Amount.String()
 		strShared := shared[0].Amount.String()
 		strOutstanding := outstanding[0].Amount.String()
-		floatCommission := strconv.ParseFloat(strCommission, 64)
-		floatShared := strconv.ParseFloat(strShared, 64)
-		floatOutstanding := strconv.ParseFloat(strOutstanding, 64)
+		floatCommission, err := strconv.ParseFloat(strCommission, 64)
+		if err != nil {
+			panic(err)
+		}
+		floatShared, err := strconv.ParseFloat(strShared, 64)
+		if err != nil {
+			panic(err)
+		}
+		floatOutstanding, err := strconv.ParseFloat(strOutstanding, 64)
+		if err != nil {
+			panic(err)
+		}
 		blockInfo.Commission = floatCommission
 		blockInfo.Shared = floatShared
 		blockInfo.Outstanding = floatOutstanding
