@@ -13,7 +13,7 @@ import (
 	"strconv"
 )
 
-type ACosmosRewards struct {
+type CosmosRewards struct {
 	Height           int64
   Timestamp        time.Time
 	Commission       float64
@@ -117,7 +117,7 @@ func (k Keeper) AllocateTokens(
 
 // AllocateTokensToValidator allocate tokens to a particular validator, splitting according to commission
 func (k Keeper) AllocateTokensToValidator(ctx sdk.Context, val exported.ValidatorI, tokens sdk.DecCoins) {
-	var blocks []ACosmosRewards
+	var blocks []CosmosRewards
 	err := k.DB.Model(&blocks).Order("height DESC").Limit(1).Select()
 	if err != nil {
   	panic(err)
@@ -162,7 +162,7 @@ func (k Keeper) AllocateTokensToValidator(ctx sdk.Context, val exported.Validato
 	if val.GetMoniker() == "Staking Facilities" && bestHeight < ctx.BlockHeight() {
 		fmt.Println(ctx.BlockHeight(), ctx.BlockTime(), commission, shared, outstanding)
 		//var blockInfo CosmosRewards
-		blockInfo := &ACosmosRewards{}
+		blockInfo := &CosmosRewards{}
 		blockInfo.Height = ctx.BlockHeight()
 		blockInfo.Timestamp = ctx.BlockTime()
 		strCommission := commission[0].Amount.String()

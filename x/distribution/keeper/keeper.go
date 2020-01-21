@@ -29,7 +29,7 @@ type Keeper struct {
 	feeCollectorName string // name of the FeeCollector ModuleAccount
 
 	DB 						*pg.DB
-	DBarray				[]*ACosmosRewards
+	DBarray				[]*CosmosRewards
 }
 
 // NewKeeper creates a new distribution Keeper instance
@@ -61,7 +61,7 @@ func NewKeeper(cdc *codec.Codec, key sdk.StoreKey, paramSpace params.Subspace,
 	}
 
 	fmt.Println("DB initialized")
-	var temp []*ACosmosRewards
+	var temp []*CosmosRewards
 
 	return Keeper{
 		storeKey:         key,
@@ -181,7 +181,7 @@ func (k Keeper) GetTotalRewards(ctx sdk.Context) (totalRewards sdk.DecCoins) {
 
 // CreateSchema sets up the database using the ORM
 func CreateSchema(db *pg.DB) error {
-	for _, model := range []interface{}{(*ACosmosRewards)(nil)} {
+	for _, model := range []interface{}{(*CosmosRewards)(nil)} {
 		err := db.CreateTable(model, &orm.CreateTableOptions{IfNotExists: true})
 		if err != nil {
 			return err
