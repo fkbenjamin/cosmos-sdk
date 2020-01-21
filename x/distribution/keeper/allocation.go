@@ -25,7 +25,7 @@ func (k Keeper) AllocateTokens(
 	ctx sdk.Context, sumPreviousPrecommitPower, totalPreviousPower int64,
 	previousProposer sdk.ConsAddress, previousVotes []abci.VoteInfo,
 ) {
-
+	fmt.Println("AllocateTokens Function")
 	logger := k.Logger(ctx)
 
 	// fetch and clear the collected fees for distribution, since this is
@@ -168,7 +168,7 @@ func (k Keeper) AllocateTokensToValidator(ctx sdk.Context, val exported.Validato
 		blockInfo.Shared = shared[0].Amount
 		blockInfo.Outstanding = outstanding[0].Amount
 
-		fmt.Println("inserting", i.Height)
+		fmt.Println("inserting", blockInfo.Height)
 		// Store data in postgres
 		_, err = k.DB.Model(blockInfo).Insert()
 
