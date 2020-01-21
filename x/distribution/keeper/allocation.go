@@ -26,7 +26,6 @@ func (k Keeper) AllocateTokens(
 	ctx sdk.Context, sumPreviousPrecommitPower, totalPreviousPower int64,
 	previousProposer sdk.ConsAddress, previousVotes []abci.VoteInfo,
 ) {
-	fmt.Println("AllocateTokens Function")
 	logger := k.Logger(ctx)
 
 	// fetch and clear the collected fees for distribution, since this is
